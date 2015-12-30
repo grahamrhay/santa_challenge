@@ -1,0 +1,4 @@
+.vagrant/
+ebin/
+*.sw[o|p]
+_rel/
