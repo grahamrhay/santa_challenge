@@ -2,3 +2,5 @@
 ebin/
 *.sw[o|p]
 _rel/
+.erlang.mk/
+deps/
