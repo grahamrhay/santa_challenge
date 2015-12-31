@@ -10,9 +10,9 @@
 -export([terminate/2]).
 -export([code_change/3]).
 
--define(MAKING_ELVES, 10).
--define(WRAPPING_ELVES, 4).
--define(LOADING_ELVES, 2).
+-define(MAKING_ELVES, 120).
+-define(WRAPPING_ELVES, 45).
+-define(LOADING_ELVES, 20).
 
 start_link(TotalPresents) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [TotalPresents], []).
