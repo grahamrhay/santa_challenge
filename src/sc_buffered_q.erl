@@ -18,19 +18,43 @@ init([Name, Limit]) ->
         name => Name,
         limit => Limit,
         count => 0,
-        wait_q => queue:new()
+        add_q => queue:new(),
+        get_q => queue:new()
     },
     {ok, State}.
 
-handle_call(add, From, State = #{count:=Count, name:=Name, limit:=Limit, wait_q:=WaitQ}) ->
+handle_call(add, From, State = #{count:=Count, name:=Name, limit:=Limit, add_q:=AddQ, get_q:=GetQ}) ->
     UpdatedCount = Count + 1,
     case UpdatedCount > Limit of
         false ->
-            lager:info("~p: added item to q (~p)", [Name, UpdatedCount]),
-            {reply, ok, State#{count => UpdatedCount}};
+            case queue:is_empty(GetQ) of
+                true ->
+                    {reply, ok, State#{count => UpdatedCount}};
+                _ ->
+                    {Client, UpdatedQ} = queue:out(GetQ),
+                    gen_server:reply(Client, ok),
+                    {reply, ok, State#{get_q => UpdatedQ}}
+            end;
         _ ->
-            lager:info("~p: limit breached", [Name]),
-            {noreply, State#{wait_q => queue:in(From, WaitQ)}}
+            lager:info("~p: limit breached (~p)", [Name, Limit]),
+            {noreply, State#{add_q => queue:in(From, AddQ)}}
+    end;
+
+handle_call(get, From, State = #{count:=Count, name:=Name, add_q:=AddQ, get_q:=GetQ}) ->
+    case Count > 0 of
+        true ->
+            case queue:is_empty(AddQ) of
+                true ->
+                    UpdatedCount = Count - 1,
+                    {reply, ok, State#{count => UpdatedCount}};
+                _ ->
+                    {Client, UpdatedQ} = queue:out(AddQ),
+                    gen_server:reply(Client, ok),
+                    {reply, ok, State#{add_q => UpdatedQ}}
+            end;
+        _ ->
+            lager:info("~p: nothing in q", [Name]),
+            {noreply, State#{get_q => queue:in(From, GetQ)}}
     end;
 
 handle_call(_Request, _From, State) ->

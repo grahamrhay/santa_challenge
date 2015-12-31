@@ -9,7 +9,9 @@ start_link() ->
 
 init([]) ->
     Procs = [
-        {sc_make_q, {sc_buffered_q, start_link, [sc_make_q, 10]}, permanent, 5000, worker, [sc_buffered_q]},
-        {sc_the_list, {sc_the_list, start_link, []}, permanent, 5000, worker, [sc_the_list]}
+        {sc_make_q, {sc_buffered_q, start_link, [sc_make_q, infinity]}, permanent, 5000, worker, [sc_buffered_q]},
+        {sc_wrap_q, {sc_buffered_q, start_link, [sc_wrap_q, 1000]}, permanent, 5000, worker, [sc_buffered_q]},
+        {sc_the_list, {sc_the_list, start_link, []}, permanent, 5000, worker, [sc_the_list]},
+        {sc_making_elf, {sc_making_elf, start_link, []}, permanent, 5000, worker, [sc_making_elf]}
     ],
     {ok, {{one_for_one, 1, 5}, Procs}}.
