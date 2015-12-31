@@ -10,8 +10,9 @@
 -export([terminate/2]).
 -export([code_change/3]).
 
--define(MAKING_ELVES, 5).
--define(WRAPPING_ELVES, 2).
+-define(MAKING_ELVES, 10).
+-define(WRAPPING_ELVES, 4).
+-define(LOADING_ELVES, 2).
 
 start_link(TotalPresents) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [TotalPresents], []).
@@ -20,6 +21,7 @@ init([TotalPresents]) ->
     gen_server:cast(self(), start),
     lists:foreach(fun(_) -> {ok, _Pid} = supervisor:start_child(sc_making_elf_sup, []) end, lists:seq(1, ?MAKING_ELVES)),
     lists:foreach(fun(_) -> {ok, _Pid} = supervisor:start_child(sc_wrapping_elf_sup, []) end, lists:seq(1, ?WRAPPING_ELVES)),
+    lists:foreach(fun(_) -> {ok, _Pid} = supervisor:start_child(sc_loading_elf_sup, []) end, lists:seq(1, ?LOADING_ELVES)),
     {ok, #{total_presents=>TotalPresents}}.
 
 handle_call(_Request, _From, State) ->
