@@ -11,7 +11,7 @@
 -export([code_change/3]).
 
 start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link(?MODULE, [], []).
 
 init([]) ->
     lager:info("Started wrapping presents"),

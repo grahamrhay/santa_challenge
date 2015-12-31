@@ -16,10 +16,12 @@ start_link() ->
 init([]) ->
     lager:info("Started elf pool"),
     erlang:send_after(1000, self(), tick),
-    {ok, #{total_elves=>0, available_elves=>0}}.
+    {ok, #{total_elves=>0, available_elves=>0, cookies=>0}}.
 
 handle_call(request_elf, _From, State = #{total_elves:=TotalElves, available_elves:=0}) ->
-    {reply, ok, State#{total_elves:=TotalElves + 1}};
+    NewTotalElves = TotalElves + 1,
+    lager:info("Total elves: ~p", [NewTotalElves]),
+    {reply, ok, State#{total_elves:=NewTotalElves}};
 
 handle_call(request_elf, _From, State = #{available_elves:=AvailableElves}) ->
     {reply, ok, State#{available_elves:=AvailableElves - 1}};
