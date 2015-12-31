@@ -16,6 +16,7 @@ init([]) ->
         {sc_the_list, {sc_the_list, start_link, []}, permanent, 5000, worker, [sc_the_list]},
         {sc_making_elf, {sc_making_elf, start_link, []}, permanent, 5000, worker, [sc_making_elf]},
         {sc_wrapping_elf, {sc_wrapping_elf, start_link, []}, permanent, 5000, worker, [sc_wrapping_elf]},
-        {sc_loading_elf, {sc_loading_elf, start_link, []}, permanent, 5000, worker, [sc_loading_elf]}
+        {sc_loading_elf, {sc_loading_elf, start_link, []}, permanent, 5000, worker, [sc_loading_elf]},
+        {sc_santa, {sc_santa, start_link, []}, permanent, 5000, worker, [sc_santa]}
     ],
     {ok, {{one_for_one, 1, 5}, Procs}}.

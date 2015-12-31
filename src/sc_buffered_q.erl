@@ -23,41 +23,41 @@ init([Name, Limit]) ->
     },
     {ok, State}.
 
-handle_call(add, From, State = #{count:=Count, name:=Name, limit:=Limit, add_q:=AddQ, get_q:=GetQ}) ->
+handle_call(add, From, State = #{count:=Count, name:=_Name, limit:=Limit, add_q:=AddQ, get_q:=GetQ}) ->
     UpdatedCount = Count + 1,
     case UpdatedCount > Limit of
         false ->
             case queue:is_empty(GetQ) of
                 true ->
-                    lager:info("~p: added item (~p)", [Name, UpdatedCount]),
+                    %lager:info("~p: added item (~p)", [Name, UpdatedCount]),
                     {reply, ok, State#{count => UpdatedCount}};
                 _ ->
-                    lager:info("~p: unblocked waiter", [Name]),
+                    %lager:info("~p: unblocked waiter", [Name]),
                     {{value, Client}, UpdatedQ} = queue:out(GetQ),
                     gen_server:reply(Client, ok),
                     {reply, ok, State#{get_q => UpdatedQ}}
             end;
         _ ->
-            lager:info("~p: limit breached (~p)", [Name, Limit]),
+            %lager:info("~p: limit breached (~p)", [Name, Limit]),
             {noreply, State#{add_q => queue:in(From, AddQ)}}
     end;
 
-handle_call(get, From, State = #{count:=Count, name:=Name, add_q:=AddQ, get_q:=GetQ}) ->
+handle_call(get, From, State = #{count:=Count, name:=_Name, add_q:=AddQ, get_q:=GetQ}) ->
     case Count > 0 of
         true ->
             case queue:is_empty(AddQ) of
                 true ->
                     UpdatedCount = Count - 1,
-                    lager:info("~p: removed item from q (~p)", [Name, UpdatedCount]),
+                    %lager:info("~p: removed item from q (~p)", [Name, UpdatedCount]),
                     {reply, ok, State#{count => UpdatedCount}};
                 _ ->
                     {Client, UpdatedQ} = queue:out(AddQ),
                     gen_server:reply(Client, ok),
-                    lager:info("~p: sent item to waiter", [Name]),
+                    %lager:info("~p: sent item to waiter", [Name]),
                     {reply, ok, State#{add_q => UpdatedQ}}
             end;
         _ ->
-            lager:info("~p: nothing in q", [Name]),
+            %lager:info("~p: nothing in q", [Name]),
             {noreply, State#{get_q => queue:in(From, GetQ)}}
     end;
 

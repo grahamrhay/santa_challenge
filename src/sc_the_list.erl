@@ -22,7 +22,8 @@ handle_call(_Request, _From, State) ->
 
 handle_cast(start, State) ->
     lager:info("Who's been naughty, and who's been nice?"),
-    lists:foreach(fun(_) -> gen_server:call(sc_make_q, add, infinity) end, lists:seq(1, 1)),
+    TotalPresents = 5000,
+    lists:foreach(fun(_) -> gen_server:call(sc_make_q, add, infinity) end, lists:seq(1, TotalPresents)),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
