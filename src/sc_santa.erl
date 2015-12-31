@@ -15,24 +15,21 @@ start_link() ->
 
 init([]) ->
     lager:info("Ho ho ho!"),
-    gen_server:cast(self(), begin_delivery),
     {ok, #{presents=>0}}.
 
-handle_call(_Request, _From, State) ->
-    {reply, ignored, State}.
-
-handle_cast(begin_delivery, State = #{presents:=Presents}) ->
-    ok = gen_server:call(sc_deliver_q, get, infinity),
+handle_call(load_present, _From, State = #{presents:=Presents}) ->
     UpdatedPresents = Presents + 1,
-    gen_server:cast(self(), begin_delivery),
     case UpdatedPresents =:= 5000 of
         true ->
             lager:info("Making delivery"),
             timer:sleep(500),
-            {noreply, State#{presents:=0}};
+            {reply, ok, State#{presents:=0}};
         _ ->
-            {noreply, State#{presents:=UpdatedPresents}}
+            {reply, ok, State#{presents:=UpdatedPresents}}
     end;
+
+handle_call(_Request, _From, State) ->
+    {reply, ignored, State}.
 
 handle_cast(_Msg, State) ->
     {noreply, State}.

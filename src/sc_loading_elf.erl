@@ -24,7 +24,7 @@ handle_call(_Request, _From, State) ->
 handle_cast(load_present, State) ->
     ok = gen_server:call(sc_load_q, get, infinity),
     sc_present:load(),
-    ok = gen_server:call(sc_deliver_q, add, infinity),
+    ok = gen_server:call(sc_santa, load_present),
     gen_server:cast(self(), load_present),
     {noreply, State};
 
