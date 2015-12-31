@@ -27,7 +27,7 @@ handle_call(load_present, _From, State = #{loaded_presents:=LoadedPresents, deli
             lager:info("Making delivery. Total delivered presents: ~p", [UpdatedPresentCount]),
             timer:sleep(500),
             case UpdatedPresentCount >= TotalPresents of
-                true -> gen_server:call(sc_elf_pool, close);
+                true -> ok = gen_server:call(sc_elf_pool, close);
                 _ -> ok
             end,
             {reply, ok, State#{loaded_presents:=0, delivered_presents:=UpdatedPresentCount}};

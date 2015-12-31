@@ -26,6 +26,7 @@ handle_call(request_elf, _From, State = #{available_elves:=AvailableElves}) ->
 
 handle_call(close, _From, State = #{cookies:=Cookies}) ->
     lager:info("Delivery complete: ~p cookies spent", [Cookies]),
+    init:stop(),
     {reply, ok, State#{total_elves:=0, available_elves:=0}};
 
 handle_call(_Request, _From, State) ->
