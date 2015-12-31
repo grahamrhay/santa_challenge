@@ -4,3 +4,4 @@ ebin/
 _rel/
 .erlang.mk/
 deps/
+*.plt

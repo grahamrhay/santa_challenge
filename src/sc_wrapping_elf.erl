@@ -1,4 +1,4 @@
--module(sc_the_list).
+-module(sc_wrapping_elf).
 -behaviour(gen_server).
 
 -export([start_link/0]).
@@ -14,15 +14,18 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    gen_server:cast(self(), start),
+    lager:info("Started wrapping presents"),
+    gen_server:cast(self(), wrap_present),
     {ok, #{}}.
 
 handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
 
-handle_cast(start, State) ->
-    lager:info("Who's been naughty, and who's been nice?"),
-    lists:foreach(fun(_) -> gen_server:call(sc_make_q, add, infinity) end, lists:seq(1, 1)),
+handle_cast(wrap_present, State) ->
+    ok = gen_server:call(sc_wrap_q, get, infinity),
+    sc_present:wrap(),
+    ok = gen_server:call(sc_load_q, add, infinity),
+    gen_server:cast(self(), wrap_present),
     {noreply, State};
 
 handle_cast(_Msg, State) ->

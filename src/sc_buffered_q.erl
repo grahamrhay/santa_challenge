@@ -29,9 +29,11 @@ handle_call(add, From, State = #{count:=Count, name:=Name, limit:=Limit, add_q:=
         false ->
             case queue:is_empty(GetQ) of
                 true ->
+                    lager:info("~p: added item (~p)", [Name, UpdatedCount]),
                     {reply, ok, State#{count => UpdatedCount}};
                 _ ->
-                    {Client, UpdatedQ} = queue:out(GetQ),
+                    lager:info("~p: unblocked waiter", [Name]),
+                    {{value, Client}, UpdatedQ} = queue:out(GetQ),
                     gen_server:reply(Client, ok),
                     {reply, ok, State#{get_q => UpdatedQ}}
             end;
@@ -46,10 +48,12 @@ handle_call(get, From, State = #{count:=Count, name:=Name, add_q:=AddQ, get_q:=G
             case queue:is_empty(AddQ) of
                 true ->
                     UpdatedCount = Count - 1,
+                    lager:info("~p: removed item from q (~p)", [Name, UpdatedCount]),
                     {reply, ok, State#{count => UpdatedCount}};
                 _ ->
                     {Client, UpdatedQ} = queue:out(AddQ),
                     gen_server:reply(Client, ok),
+                    lager:info("~p: sent item to waiter", [Name]),
                     {reply, ok, State#{add_q => UpdatedQ}}
             end;
         _ ->
