@@ -14,6 +14,7 @@ start_link(Name, Limit) ->
     gen_server:start_link({local, Name}, ?MODULE, [Name, Limit], []).
 
 init([Name, Limit]) ->
+    erlang:send_after(1000, self(), tick),
     State = #{
         name => Name,
         limit => Limit,
@@ -66,6 +67,11 @@ handle_call(_Request, _From, State) ->
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
+
+handle_info(tick, State = #{name:=Name, count:=Count}) ->
+    erlang:send_after(1000, self(), tick),
+    lager:info("~p => ~p", [Name, Count]),
+    {noreply, State};
 
 handle_info(_Info, State) ->
     {noreply, State}.

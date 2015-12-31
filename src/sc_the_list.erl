@@ -1,7 +1,7 @@
 -module(sc_the_list).
 -behaviour(gen_server).
 
--export([start_link/0]).
+-export([start_link/1]).
 
 -export([init/1]).
 -export([handle_call/3]).
@@ -10,19 +10,18 @@
 -export([terminate/2]).
 -export([code_change/3]).
 
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+start_link(TotalPresents) ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [TotalPresents], []).
 
-init([]) ->
+init([TotalPresents]) ->
     gen_server:cast(self(), start),
-    {ok, #{}}.
+    {ok, #{total_presents=>TotalPresents}}.
 
 handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
 
-handle_cast(start, State) ->
+handle_cast(start, State=#{total_presents:=TotalPresents}) ->
     lager:info("Who's been naughty, and who's been nice?"),
-    TotalPresents = 5000,
     lists:foreach(fun(_) -> gen_server:call(sc_make_q, add, infinity) end, lists:seq(1, TotalPresents)),
     {noreply, State};
 

@@ -15,6 +15,7 @@ start_link() ->
 
 init([]) ->
     lager:info("Started wrapping presents"),
+    ok = gen_server:call(sc_elf_pool, request_elf),
     gen_server:cast(self(), wrap_present),
     {ok, #{}}.
 
